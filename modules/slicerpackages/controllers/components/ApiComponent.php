@@ -80,7 +80,27 @@ class Slicerpackages_ApiComponent extends AppComponent
     fclose($in);
     fclose($out);
 
-    return array('package_id' => '1', 'name' => $args['name'], 'sizeread' => $uploadOffset);
+    $modelLoader = new MIDAS_ModelLoader();
+    $communityModel = $modelLoader->loadModel('Community');
+    $community = $communityModel->getByName('Slicer');
+
+    if(!$community)
+      {
+      throw new Exception('The Slicer community does not exist', -1);
+      }
+    $folderModel = $modelLoader->loadModel('Folder');
+    $name = ucfirst($args['submissiontype']);
+    $typeFolder = $folderModel->getFolderExists($name, $community->getPublicfolder());
+
+    if(!$typeFolder)
+      {
+      throw new Exception('Folder '.$name.' does not exist in the Slicer community');
+      }
+    $componentLoader = new MIDAS_ComponentLoader();
+    $uploadComponent = $componentLoader->loadComponent('Upload');
+    $item = $uploadComponent->createUploadedItem($userDao, $args['name'], $tmpfile, $typeFolder);
+    //TODO create package entry
+    return array('item' => $item);
     }
 
   /**

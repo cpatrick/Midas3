@@ -32,12 +32,13 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
       {
       if($folder->getName() == 'Release')
         {
-        $this->view->folders= $folder->getFolders();
+        $this->view->folders = $folder->getFolders();
         break;
         }
       }
     }
 
+  /** Admin action */
   public function adminAction()
     {
     $this->view->nPackages = count($this->Slicerpackages_Package->getAll());
@@ -55,12 +56,11 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
                              'stat' => 0));
       exit();
       }
-    $communityDao =
-      $this->Community->createCommunity('Slicer',
-                                        'Community for storing slicer packages',
-                                        MIDAS_COMMUNITY_PUBLIC,
-                                        $userDao,
-                                        true);
+    $communityDao = $this->Community->createCommunity('Slicer',
+                                                      'Community for storing slicer packages',
+                                                      MIDAS_COMMUNITY_PUBLIC,
+                                                      $userDao,
+                                                      true);
     $this->Folder->createFolder('Nightly',
                                 'For Nightly Builds',
                                 $communityDao->getPublicFolder());

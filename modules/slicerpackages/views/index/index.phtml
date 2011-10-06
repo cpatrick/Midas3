@@ -26,12 +26,13 @@ $this->headScript()->appendFile(
     echo '<div class="releasefolder"><h3>'.$folder->getName().'</h3>';
     foreach($folder->getItems() as $item)
       {
-      echo '<a href='.$this->webroot.'/download/?items='.$item->getKey().'>'.$item->getName().'</a>';
+      echo '<a href='.$this->webroot.'/download/?items='.$item->getKey().'>'.$item->getName().'</a><br />';
       }
-    echo '</div>';
+    echo '<br /></div>';
     }
 ?>
   </div>
+</div>
 <div class="viewSideBar">
   <div align="justify" class='sideElementFirst feedNotification'>
   This plugin enables the download of slicer packages in a nice, user-friendly

@@ -90,7 +90,8 @@ class Slicerpackages_ApiComponent extends AppComponent
       }
     $folderModel = $modelLoader->loadModel('Folder');
     $name = ucfirst($args['submissiontype']);
-    $typeFolder = $folderModel->getFolderExists($name, $community->getPublicfolder());
+    $publicFolder = $folderModel->load($community->getPublicfolderId());
+    $typeFolder = $folderModel->getFolderExists($name, $publicFolder);
 
     if(!$typeFolder)
       {

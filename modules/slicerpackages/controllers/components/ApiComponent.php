@@ -47,7 +47,12 @@ class Slicerpackages_ApiComponent extends AppComponent
                             'submissiontype',
                             'packagetype'), $value);
 
-    return array('package_id' => '1');
+    $file = $_FILES['file'];
+
+      $filename = $file['name'];
+      $filepath = $file['tmp_name'];
+      $filesize = $file['size'];
+    return array('package_id' => '1', 'file' => $file);
     }
 
   /**

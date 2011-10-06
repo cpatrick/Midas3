@@ -102,7 +102,7 @@ class Api_IndexController extends Api_AppController
     {
     $apiMethodPrefix = KwWebApiCore::checkApiMethodPrefix($apiMethodPrefix); //append the . if needed
 
-    // Get the list of methods in each module (including this one)
+    //$this->_helper->layout->disableLayout();    // Get the list of methods in each module (including this one)
     $apiMethods = Zend_Registry::get('notifier')->callback('CALLBACK_API_HELP', array());
     foreach($apiMethods as $module => $methods)
       {

@@ -1,0 +1,10 @@
+div.viewMain h3 {
+  padding-top: 0px;
+  margin-top: 2px;
+}
+
+div#messages {
+  height: 1em;
+  padding-bottom: 10px;
+  padding-top: 10px;
+}

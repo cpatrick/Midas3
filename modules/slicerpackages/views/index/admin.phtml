@@ -9,29 +9,18 @@ This software is distributed WITHOUT ANY WARRANTY; without even
 the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
 PURPOSE.  See the above copyright notices for more information.
 =========================================================================*/
-?>
-<?php
+
 $this->headScript()->appendFile(
   $this->apiWebroot . '/public/js/common/common.ajaxapi.js');
 $this->headScript()->appendFile(
-  $this->moduleWebroot . '/public/js/index/slicerpackages.index.js');
+  $this->moduleWebroot . '/public/js/index/slicerpackages.admin.js');
 ?>
-<link type="text/css" rel="stylesheet" href="<?php echo $this->moduleWebroot?>/public/css/slicerpackages.index.css" />
+<link type="text/css" rel="stylesheet" href="<?php echo $this->moduleWebroot?>/public/css/slicerpackages.admin.css" />
 <div class="viewMain">
-  <h3>Slicer Packages</h3>
-  <div>
-<?php
-  foreach($this->folders as $folder)
-    {
-    echo '<div class="releasefolder"><h3>'.$folder->getName().'</h3>';
-    foreach($folder->getItems() as $item)
-      {
-      echo '<a href='.$this->webroot.'/download/?items='.$item->getKey().'>'.$item->getName().'</a>';
-      }
-    echo '</div>';
-    }
-?>
-  </div>
+  <h3>Slicer Packages Admin</h3>
+  <div id="messages"></div>
+  <a id="createhierarchy" href="#">Create Slicer Community/Folder Hierarcy</a>
+</div>
 <div class="viewSideBar">
   <div align="justify" class='sideElementFirst feedNotification'>
   This plugin enables the download of slicer packages in a nice, user-friendly

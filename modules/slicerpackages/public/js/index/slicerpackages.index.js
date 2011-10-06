@@ -1,8 +1,15 @@
-  $(document).ready(function() {
-    /*ajaxWebApi.ajax({
-        "method" : "midas.validation.test",
-        "success": function(data) {
-            alert(data.data.foo);
-        }
-    });*/
-  });
+$(document).ready(function() {
+    var msgDiv = $('#messages');
+    var createHierarchyLink = $('#createhierarchy');
+    createHierarchyLink.click(function() {
+	$.getJSON(json.global.webroot + '/slicerpackages/createstructure',
+		  function(data) {
+		      msgDiv.text(data.msg);
+		      if(data.stat) {
+			  msgDiv.css('color','green');
+		      } else {
+			  msgDiv.css('color','red');
+		      }
+		  });
+    });
+});

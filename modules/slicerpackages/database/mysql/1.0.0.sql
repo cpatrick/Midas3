@@ -1,4 +1,3 @@
-DROP TABLE `slicerpackages_package`;
 CREATE TABLE IF NOT EXISTS `slicerpackages_package` (
   `package_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `item_id` bigint(20) NOT NULL,

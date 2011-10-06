@@ -106,6 +106,7 @@ class Slicerpackages_ApiComponent extends AppComponent
       throw new Exception('Failed to create item', -1);
       }
     $packageModel = $modelLoader->loadModel('Package', 'slicerpackages');
+    $packageModel->loadDaoClass('PackageDao', 'slicerpackages');
     $packageDao = new Slicerpackages_PackageDao();
     $packageDao->setItemId($item->getKey());
     $packageDao->setSubmissiontype($args['submissiontype']);

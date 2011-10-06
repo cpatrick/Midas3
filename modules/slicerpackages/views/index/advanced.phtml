@@ -1,0 +1,105 @@
+<?php
+/*=========================================================================
+MIDAS Server
+Copyright (c) Kitware SAS. 20 rue de la Villette. All rights reserved.
+69328 Lyon, FRANCE.
+
+See Copyright.txt for details.
+This software is distributed WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.  See the above copyright notices for more information.
+=========================================================================*/
+?>
+<?php
+$this->headScript()->appendFile(
+  $this->apiWebroot . '/public/js/common/common.ajaxapi.js');
+$this->headScript()->appendFile(
+  $this->moduleWebroot . '/public/js/jquery.tablesorter.min.js');
+$this->headScript()->appendFile(
+  $this->moduleWebroot . '/public/js/index/slicerpackages.advanced.js');
+?>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->moduleWebroot?>/public/css/slicerpackages.advanced.css" />
+<div class="viewMain">
+  <h3>Slicer Packages (Advanced)</h3>
+  <div>
+    <form id="osRaidos">
+      <h4>Operating System</h4>
+      <span class="choice">
+        <input type="radio" name="osGroup" value="any" checked>Any
+      </span>
+      <span class="choice">
+        <input type="radio" name="osGroup" value="linux">GNU/Linux
+      </span>
+      <span class="choice">
+        <input type="radio" name="osGroup" value="mac">Mac OSX
+      </span>
+      <span class="choice">
+        <input type="radio" name="osGroup" value="win">Windows
+      </span>
+    </form>
+    <form id="archRadios">
+      <h4>Architecture</h4>
+      <span class="choice">
+        <input type="radio" name="archGroup" value="any" checked>Any
+      </span>
+      <span class="choice">
+        <input type="radio" name="archGroup" value="i386">32 bit
+      </span>
+      <span class="choice">
+        <input type="radio" name="archGroup" value="amd64">64 bit
+      </span>
+    </form>
+    <form id="buildtypeRadios">
+      <h4>Build Type</h4>
+      <span class="choice">
+        <input type="radio" name="buildGroup" value="any" checked>Any
+      </span>
+      <span class="choice">
+        <input type="radio" name="buildGroup" value="stable">Stable
+      </span>
+      <span class="choice">
+        <input type="radio" name="buildGroup" value="nightly">Nightly
+      </span>
+      <span class="choice">
+        <input type="radio" name="buildGroup" value="experimental">Experimental
+      </span>
+    </form>
+  </div>
+    <table id="dataTable" class="tablesorter">
+      <thead>
+        <tr>
+          <th>Package Name</th>
+          <th>Operating System</th>
+          <th>Architecture</th>
+          <th>Build Type</th>
+          <th>Revision</th>
+          <th>Link</th>
+       </tr>
+      </thead>
+      <tbody>
+<?php foreach( $this->packages as $package )
+{
+  echo '<tr><td>'.$package->getItemId().'</td>';
+  echo '<td>'.$package->getOs().'</td>';
+  echo '<td>'.$package->getArch().'</td>';
+  echo '<td>'.$package->getSubmissiontype().'</td>';
+  echo '<td>'.$package->getRevision().'</td>';
+  echo '<td><a href="'.$this->webroot.'/download/?items='.$package->getItemId().'">download</a></td></tr>';
+} ?>
+      </tbody>
+    </table>
+</div>
+<div class="viewSideBar">
+  <div align="justify" class='sideElementFirst feedNotification'>
+  This plugin enables the download of slicer packages in a nice, user-friendly
+  way.
+  </div>
+  <div class="sideElementLast feedStats">
+    <h1>Stats</h1>
+    <?php
+    echo "<ul>";
+    echo "  <li>{$this->nPackages} {$this->t('package')}".(($this->nPackages>1)?'s':'')."</li>";
+    echo "</ul>";
+    ?>
+  </div>
+</div>

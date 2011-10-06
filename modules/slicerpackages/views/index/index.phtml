@@ -21,12 +21,12 @@ $this->headScript()->appendFile(
   <h3>Slicer Packages</h3>
   <div>
 <?php
-  foreach($this->folders as $folder)
+  foreach($this->packageSets as $folderName => $packageSet)
     {
-    echo '<div class="releasefolder"><h3>'.$folder->getName().'</h3>';
-    foreach($folder->getItems() as $item)
+    echo '<div class="releasefolder"><h3>'.$folderName.'</h3>';
+    foreach($packageSet as $name => $package)
       {
-      echo '<a href='.$this->webroot.'/download/?items='.$item->getKey().'>'.$item->getName().'</a><br />';
+      echo '<a href='.$this->webroot.'/download/?items='.$package->getItemId().'>'.$name.'</a><br />';
       }
     echo '<br /></div>';
     }

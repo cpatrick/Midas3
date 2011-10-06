@@ -33,4 +33,15 @@ class Slicerpackages_PackageModel extends Slicerpackages_PackageModelBase
     return $rowsetAnalysed;
     }
 
+  /**
+   * Return a slicerpackage_Package dao based on an itemId.
+   */
+  public function getByItemId($itemId)
+    {
+    $sql = $this->database->select()->where('item_id = ?', $itemId);
+    $row = $this->database->fetchRow($sql);
+    $dao = $this->initDao('Package', $row, 'slicerpackages');
+    return $dao;
+    }
+
 }  // end class

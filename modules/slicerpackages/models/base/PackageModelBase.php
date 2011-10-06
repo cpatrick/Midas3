@@ -37,4 +37,6 @@ abstract class Slicerpackages_PackageModelBase extends Slicerpackages_AppModel
     $this->initialize(); // required
     } // end __construct()
 
+  public abstract function getByItemId($itemId);
+
 } // end class Slicerpackages_PackageModelBase

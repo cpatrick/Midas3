@@ -32,7 +32,15 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
       {
       if($folder->getName() == 'Release')
         {
-        $this->view->folders = $folder->getFolders();
+        $this->view->packageSets = array();
+        foreach($folder->getFolders() as $subFolder)
+          {
+          $this->view->packageSets[$subFolder->getName()] = array();
+          foreach( $subFolder->getItems() as $item )
+            {
+            $this->view->packageSets[$subFolder->getName()][$item->getName()] = $this->Slicerpackages_Package->getByItemId($item->getKey());
+            }
+          }
         break;
         }
       }
@@ -73,6 +81,12 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
     echo json_encode(array('msg' => 'Slicer Community created successfully!',
                            'stat' => 1));
     exit();
+    }
+
+  public function advancedAction()
+    {
+    $this->view->packages = $this->Slicerpackages_Package->getAll();
+    $this->view->nPackages = count($this->view->packages);
     }
 
 }//end class

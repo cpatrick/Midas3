@@ -138,12 +138,12 @@ class Slicerpackages_ApiComponent extends AppComponent
     foreach($daos as $dao)
       {
       $results[] = array('package_id' => $dao->getKey(),
-                         'item_id' => $dao->getItmeId(),
+                         'item_id' => $dao->getItemId(),
                          'os' => $dao->getOs(),
                          'arch' => $dao->getArch(),
                          'revision' => $dao->getRevision(),
-                         'submission' => $dao->getSubmission(),
-                         'package' => $dao->getPackage());
+                         'submission' => $dao->getSubmissiontype(),
+                         'package' => $dao->getPackagetype());
       }
     return $results;
     }

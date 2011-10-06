@@ -114,7 +114,7 @@ class Slicerpackages_ApiComponent extends AppComponent
     $packageDao->setOs($args['os']);
     $packageDao->setArch($args['arch']);
     $packageDao->setRevision($args['revision']);
-    $packageDao->save();
+    $packageModel->save($packageDao);
 
     return array('package' => $packageDao);
     }

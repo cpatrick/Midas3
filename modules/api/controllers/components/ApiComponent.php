@@ -489,6 +489,41 @@ class Api_ApiComponent extends AppComponent
     }
 
   /**
+   * Get the immediate children of a community (non-recursive)
+   * @param token (Optional) Authentication token
+   * @param id The id of the community
+   * @return The folders in the community
+   */
+  function communityChildren($args)
+    {
+    $this->_validateParams($args, array('id'));
+
+    $id = $args['id'];
+
+    $modelLoader = new MIDAS_ModelLoader();
+    $communityModel = $modelLoader->loadModel('Community');
+    $folderModel = $modelLoader->loadModel('Folder');
+    $community = $communityModel->load($id);
+    if(!$community)
+      {
+      throw new Exception('Invalid community id', MIDAS_INVALID_PARAMETER);
+      }
+    $folder = $folderModel->load($community->getFolderId());
+
+    $userDao = $this->_getUser($args);
+    try
+      {
+      $folders = $folderModel->getChildrenFoldersFiltered($folder, $userDao);
+      }
+    catch(Exception $e)
+      {
+      throw new Exception($e->getMessage(), MIDAS_INTERNAL_ERROR);
+      }
+
+    return array('folders' => $folders);
+    }
+
+  /**
    * Return a list of all communities visible to a user
    * @param token (Optional) Authentication token
    * @return A list of all communities
@@ -676,8 +711,15 @@ class Api_ApiComponent extends AppComponent
     $folder = $folderModel->load($id);
 
     $userDao = $this->_getUser($args);
-    $folders = $folderModel->getChildrenFoldersFiltered($folder, $userDao);
-    $items = $folderModel->getItemsFiltered($folder, $userDao);
+    try
+      {
+      $folders = $folderModel->getChildrenFoldersFiltered($folder, $userDao);
+      $items = $folderModel->getItemsFiltered($folder, $userDao);
+      }
+    catch(Exception $e)
+      {
+      throw new Exception($e->getMessage(), MIDAS_INTERNAL_ERROR);
+      }
 
     return array('folders' => $folders, 'items' => $items);
     }
@@ -737,6 +779,7 @@ class Api_ApiComponent extends AppComponent
    * Get an item's information
    * @param token (Optional) Authentication token
    * @param id The item id
+   * @param head (Optional) only list the most recent revision
    * @return The item object
    */
   function itemGet($args)
@@ -755,8 +798,22 @@ class Api_ApiComponent extends AppComponent
       }
 
     $itemArray = $item->toArray();
-    $revisions = $item->getRevisions();
+
+    $owningFolders = $item->getFolders();
+    if(count($owningFolders) > 0)
+      {
+      $itemArray['folder_id'] = $owningFolders[0]->parent_id;
+      }
+
     $revisionsArray = array();
+    if(array_key_exists('head', $args))
+      {
+      $revisions = array($itemModel->getLastRevision($item));
+      }
+    else //get all revisions
+      {
+      $revisions = $item->getRevisions();
+      }
     foreach($revisions as $revision)
       {
       $bitstreamArray = array();
@@ -920,4 +977,106 @@ class Api_ApiComponent extends AppComponent
     return array('apikey' => $defaultApiKey);
     }
 
+  /**
+   * Fetch the information about a bitstream
+   * @param token (Optional) Authentication token
+   * @param id The id of the bitstream
+   * @return Bitstream dao
+   */
+  function bitstreamGet($args)
+    {
+    $this->_validateParams($args, array('id'));
+    $userDao = $this->_getUser($args);
+    $modelLoader = new MIDAS_ModelLoader();
+    $bitstreamModel = $modelLoader->loadModel('Bitstream');
+    $bitstream = $bitstreamModel->load($args['id']);
+
+    if(!$bitstream)
+      {
+      throw new Exception('Invalid bitstream id', MIDAS_INVALID_PARAMETER);
+      }
+
+    if(array_key_exists('name', $args))
+      {
+      $bitstream->setName($args['name']);
+      }
+    $revisionModel = $modelLoader->loadModel('ItemRevision');
+    $revision = $revisionModel->load($bitstream->getItemrevisionId());
+
+    if(!$revision)
+      {
+      throw new Exception('Invalid revision id', MIDAS_INTERNAL_ERROR);
+      }
+    $itemModel = $modelLoader->loadModel('Item');
+    $item = $itemModel->load($revision->getItemId());
+    if(!$item || !$itemModel->policyCheck($item, $userDao, MIDAS_POLICY_READ))
+      {
+      throw new Exception("This item doesn't exist or you don't have the permissions.", MIDAS_INVALID_POLICY);
+      }
+    $bitstreamArray = array();
+    $bitstreamArray['name'] = $bitstream->getName();
+    $bitstreamArray['size'] = $bitstream->getSizebytes();
+    $bitstreamArray['mimetype'] = $bitstream->getMimetype();
+    $bitstreamArray['checksum'] = $bitstream->getChecksum();
+    $bitstreamArray['itemrevision_id'] = $bitstream->getItemrevisionId();
+    $bitstreamArray['item_id'] = $revision->getItemId();
+    return $bitstreamArray;
+    }
+
+  /**
+   * Download a bitstream either by its id or by a checksum. Either an id or checksum parameter is required.
+   * @param token (Optional) Authentication token
+   * @param id (Optional) The id of the bitstream
+   * @param checksum (Optional) The checksum of the bitstream
+   * @param name (Optional) Alternate filename to download as
+   */
+  function bitstreamDownload($args)
+    {
+    if(!array_key_exists('id', $args) && !array_key_exists('checksum', $args))
+      {
+      throw new Exception('Either an id or checksum parameter is required', MIDAS_INVALID_PARAMETER);
+      }
+    $userDao = $this->_getUser($args);
+    $modelLoader = new MIDAS_ModelLoader();
+    $bitstreamModel = $modelLoader->loadModel('Bitstream');
+    if(array_key_exists('id', $args))
+      {
+      $bitstream = $bitstreamModel->load($args['id']);
+      }
+    else
+      {
+      $bitstream = $bitstreamModel->getByChecksum($args['checksum']);
+      }
+
+    if(!$bitstream)
+      {
+      throw new Exception('Invalid bitstream id', MIDAS_INVALID_PARAMETER);
+      }
+
+    if(array_key_exists('name', $args))
+      {
+      $bitstream->setName($args['name']);
+      }
+    $revisionModel = $modelLoader->loadModel('ItemRevision');
+    $revision = $revisionModel->load($bitstream->getItemrevisionId());
+
+    if(!$revision)
+      {
+      throw new Exception('Invalid revision id', MIDAS_INTERNAL_ERROR);
+      }
+    $itemModel = $modelLoader->loadModel('Item');
+    $item = $itemModel->load($revision->getItemId());
+    if(!$item || !$itemModel->policyCheck($item, $userDao, MIDAS_POLICY_READ))
+      {
+      throw new Exception("This item doesn't exist or you don't have the permissions.", MIDAS_INVALID_POLICY);
+      }
+    if(strpos($bitstream->getPath(), 'http://') !== false)
+      {
+      $this->_redirect($bitstream->getPath());
+      return;
+      }
+    $componentLoader = new MIDAS_ComponentLoader();
+    $downloadComponent = $componentLoader->loadComponent('DownloadBitstream');
+    $downloadComponent->download($bitstream);
+    }
   } // end class

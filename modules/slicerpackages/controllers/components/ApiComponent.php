@@ -95,13 +95,27 @@ class Slicerpackages_ApiComponent extends AppComponent
 
     if(!$typeFolder)
       {
-      throw new Exception('Folder '.$name.' does not exist in the Slicer community');
+      throw new Exception('Folder '.$name.' does not exist in the Slicer community', -1);
       }
     $componentLoader = new MIDAS_ComponentLoader();
     $uploadComponent = $componentLoader->loadComponent('Upload');
     $item = $uploadComponent->createUploadedItem($userDao, $args['name'], $tmpfile, $typeFolder);
-    //TODO create package entry
-    return array('item' => $item);
+
+    if(!$item)
+      {
+      throw new Exception('Failed to create item', -1);
+      }
+    $packageModel = $modelLoader->loadModel('Package', 'slicerpackages');
+    $packageDao = new Slicerpackages_PackageDao();
+    $packageDao->setItemId($item->getKey());
+    $packageDao->setSubmissiontype($args['submissiontype']);
+    $packageDao->setPackagetype($args['packagetype']);
+    $packageDao->setOs($args['os']);
+    $packageDao->setArch($args['arch']);
+    $packageDao->setRevision($args['revision']);
+    $packageDao->save();
+
+    return array('package' => $packageDao);
     }
 
   /**

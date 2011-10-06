@@ -29,6 +29,16 @@ class Slicerpackages_ApiComponent extends AppComponent
     }
 
   /**
+   * Helper function to get the user from token or session authentication
+   */
+  private function _getUser($args)
+    {
+    $componentLoader = new MIDAS_ComponentLoader();
+    $authComponent = $componentLoader->loadComponent('Authentication', 'api');
+    return $authComponent->getUser($args, $this->userSession->Dao);
+    }
+
+  /**
    * Get the name of the requested dashboard
    * @param os the target operating system of the package
    * @param arch the os chip architecture (i386, amd64, etc)
@@ -47,19 +57,28 @@ class Slicerpackages_ApiComponent extends AppComponent
                             'submissiontype',
                             'packagetype'), $args);
 
-    $inputfile = 'php://input'; // Stream (Client -> Server) Mode: Read, Binary
-    $in = fopen($inputfile, 'rb');    // Stream (LocalServerFile -> Server) Mode: Read, Binary
+    $userDao = $this->_getUser($args);
+    if($userDao === false)
+      {
+      throw new Exception('Invalid user authentication', -1);
+      }
 
-    $bufSize = 10485760;
+    $inputfile = 'php://input';
+    $tmpfile = tempnam(BASE_PATH.'/tmp/misc', 'slicerpackage');
+    $in = fopen($inputfile, 'rb');
+    $out = fopen($tmpfile, 'wb');
 
-    $uploadOffset = 0;
+    $bufSize = 1024 * 1024;
+
+    $size = 0;
     // read from input and write into file
     while(connection_status() == CONNECTION_NORMAL && ($buf = fread($in, $bufSize)))
       {
-      $uploadOffset += strlen($buf);
-      //fwrite($out, $buf);
+      $size += strlen($buf);
+      fwrite($out, $buf);
       }
     fclose($in);
+    fclose($out);
 
     return array('package_id' => '1', 'name' => $args['name'], 'sizeread' => $uploadOffset);
     }

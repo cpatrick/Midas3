@@ -38,21 +38,37 @@ class Slicerpackages_ApiComponent extends AppComponent
    * @param packagetype installer, data, module, etc
    * @return status of the upload
    */
-  public function uploadPackage($value)
+  public function uploadPackage($args)
     {
     $this->_checkKeys(array('os',
                             'arch',
                             'name',
                             'revision',
                             'submissiontype',
-                            'packagetype'), $value);
+                            'packagetype',
+                            'length'), $args);
 
-    $file = $_FILES['file'];
+    $inputfile = 'php://input'; // Stream (Client -> Server) Mode: Read, Binary
+    $in = fopen($inputfile, 'rb');    // Stream (LocalServerFile -> Server) Mode: Read, Binary
 
-      $filename = $file['name'];
-      $filepath = $file['tmp_name'];
-      $filesize = $file['size'];
-    return array('package_id' => '1', 'file' => $file);
+    $bufSize = 10485760;
+    $length = $args['length'];
+    $bufSize = ($length < $bufSize) ? $length : $bufSize;
+
+    $uploadOffset = 0;
+    // read from input and write into file
+    while(connection_status() == CONNECTION_NORMAL && $uploadOffset < $length && ($buf = fread($in, $bufSize)))
+      {
+      $uploadOffset += strlen($buf);
+      //fwrite($out, $buf);
+      if($length - $uploadOffset < $bufSize)
+        {
+        $bufSize = $length - $uploadOffset;
+        }
+      }
+    fclose($in);
+
+    return array('package_id' => '1', 'name' => $args['name'], 'sizeread' => $uploadOffset);
     }
 
   /**

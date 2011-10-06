@@ -1,0 +1,35 @@
+<?php
+/*=========================================================================
+MIDAS Server
+Copyright (c) Kitware SAS. 20 rue de la Villette. All rights reserved.
+69328 Lyon, FRANCE.
+
+See Copyright.txt for details.
+This software is distributed WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.  See the above copyright notices for more information.
+=========================================================================*/
+?>
+<?php
+$this->headScript()->appendFile(
+  $this->apiWebroot . '/public/js/common/common.ajaxapi.js');
+$this->headScript()->appendFile(
+  $this->moduleWebroot . '/public/js/index/slicerpackages.index.js');
+?>
+<div class="viewMain">
+  <h3>Active Validation Dashboards</h3>
+</div>
+<div class="viewSideBar">
+  <div align="justify" class='sideElementFirst feedNotification'>
+  This plugin enables the download of slicer packages in a nice, user-friendly
+  way.
+  </div>
+  <div class="sideElementLast feedStats">
+    <h1>Stats</h1>
+    <?php
+    echo "<ul>";
+    echo "  <li>{$this->nPackages} {$this->t('package')}".(($this->nPackages>1)?'s':'')."</li>";
+    echo "</ul>";
+    ?>
+  </div>
+</div>

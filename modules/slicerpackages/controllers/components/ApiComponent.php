@@ -45,19 +45,16 @@ class Slicerpackages_ApiComponent extends AppComponent
                             'name',
                             'revision',
                             'submissiontype',
-                            'packagetype',
-                            'length'), $args);
+                            'packagetype'), $args);
 
     $inputfile = 'php://input'; // Stream (Client -> Server) Mode: Read, Binary
     $in = fopen($inputfile, 'rb');    // Stream (LocalServerFile -> Server) Mode: Read, Binary
 
     $bufSize = 10485760;
-    $length = $args['length'];
-    $bufSize = ($length < $bufSize) ? $length : $bufSize;
 
     $uploadOffset = 0;
     // read from input and write into file
-    while(connection_status() == CONNECTION_NORMAL && $uploadOffset < $length && ($buf = fread($in, $bufSize)))
+    while(connection_status() == CONNECTION_NORMAL && ($buf = fread($in, $bufSize)))
       {
       $uploadOffset += strlen($buf);
       //fwrite($out, $buf);

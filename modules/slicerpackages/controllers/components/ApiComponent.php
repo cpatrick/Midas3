@@ -86,6 +86,7 @@ class Slicerpackages_ApiComponent extends AppComponent
 
     if(!$community)
       {
+      unlink($tmpfile);
       throw new Exception('The Slicer community does not exist', -1);
       }
     $folderModel = $modelLoader->loadModel('Folder');
@@ -95,11 +96,14 @@ class Slicerpackages_ApiComponent extends AppComponent
 
     if(!$typeFolder)
       {
+      unlink($tmpfile);
       throw new Exception('Folder '.$name.' does not exist in the Slicer community', -1);
       }
     $componentLoader = new MIDAS_ComponentLoader();
     $uploadComponent = $componentLoader->loadComponent('Upload');
     $item = $uploadComponent->createUploadedItem($userDao, $args['name'], $tmpfile, $typeFolder);
+
+    unlink($tmpfile);
 
     if(!$item)
       {

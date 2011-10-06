@@ -58,10 +58,6 @@ class Slicerpackages_ApiComponent extends AppComponent
       {
       $uploadOffset += strlen($buf);
       //fwrite($out, $buf);
-      if($length - $uploadOffset < $bufSize)
-        {
-        $bufSize = $length - $uploadOffset;
-        }
       }
     fclose($in);
 

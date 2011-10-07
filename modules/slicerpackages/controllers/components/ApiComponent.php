@@ -40,13 +40,13 @@ class Slicerpackages_ApiComponent extends AppComponent
 
   /**
    * Get the name of the requested dashboard
-   * @param os the target operating system of the package
-   * @param arch the os chip architecture (i386, amd64, etc)
-   * @param name the name of the installer
-   * @param revision the svn or git revision of the installer
-   * @param submissiontype whether this is from a nightly, release etc dashboard
-   * @param packagetype installer, data, module, etc
-   * @return status of the upload
+   * @param os The target operating system of the package
+   * @param arch The os chip architecture (i386, amd64, etc)
+   * @param name The name of the package (ie installer name)
+   * @param revision The svn or git revision of the installer
+   * @param submissiontype Whether this is from a nightly, experimental, continuous, etc dashboard
+   * @param packagetype Installer, data, extension, etc
+   * @return Status of the upload
    */
   public function uploadPackage($args)
     {
@@ -125,14 +125,21 @@ class Slicerpackages_ApiComponent extends AppComponent
 
   /**
    * Get all available slicer packages
-   * @return an array of slicer packages
+   * @param os (Optional) The target operating system of the package
+   * @param arch (Optional) The os chip architecture (i386, amd64, etc) 
+   * @param submissiontype (Optional) Whether this is from a nightly, experimental, continuous, etc dashboard
+   * @param packagetype (Optional) Installer, data, extension, etc
+   * @return An array of slicer packages
    */
-  public function getAllPackages($value)
+  public function getPackages($args)
     {
+    
     $modelLoad = new MIDAS_ModelLoader();
     $model = $modelLoad->loadModel('Package', 'slicerpackages');
     $model->loadDaoClass('PackageDao', 'slicerpackages');
-    $daos = $model->getAll();
+    
+    $exactmatches = $args;
+    $daos = $model->get($exactmatches);
 
     $results = array();
     foreach($daos as $dao)
@@ -142,7 +149,7 @@ class Slicerpackages_ApiComponent extends AppComponent
                          'os' => $dao->getOs(),
                          'arch' => $dao->getArch(),
                          'revision' => $dao->getRevision(),
-                         'submission' => $dao->getSubmissiontype(),
+                         'submissiontype' => $dao->getSubmissiontype(),
                          'package' => $dao->getPackagetype());
       }
     return $results;

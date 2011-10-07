@@ -64,27 +64,32 @@ $this->headScript()->appendFile(
       ?>
     </form>
   </div>
-    <table id="dataTable" class="tablesorter">
-      <thead>
-        <tr>
-          <th>Package Name</th>
-          <th>Operating System</th>
-          <th>Architecture</th>
-          <th>Build Type</th>
-          <th>Revision</th>
-          <th>Link</th>
-        </tr>
-      </thead>
-      <tbody>
-<?php foreach( $this->packages as $package )
-{
-  echo '<tr><td>'.$package->getItemId().'</td>';
-  echo '<td>'.$package->getOs().'</td>';
-  echo '<td>'.$package->getArch().'</td>';
-  echo '<td>'.$package->getSubmissiontype().'</td>';
-  echo '<td>'.$package->getRevision().'</td>';
-  echo '<td><a href="'.$this->webroot.'/download/?items='.$package->getItemId().'">download</a></td></tr>';
-} ?>
+  <table id="dataTable" class="tablesorter">
+    <thead>
+      <tr>
+        <th>Package Name</th>
+        <th>Operating System</th>
+        <th>Architecture</th>
+        <th>Build Type</th>
+        <th>Revision</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody id="dataTableContent">
+<?php //foreach( $this->packages as $package )
+//{
+//  echo '<tr><td>'.$package->getItemId().'</td>';
+//  echo '<td class="os '.$package->getOs().'">'.$package->getOs().'</td>';
+//  echo '<td>'.$package->getArch().'</td>';
+//  echo '<td>'.$package->getSubmissiontype().'</td>';
+//  echo '<td>'.$package->getRevision().'</td>';
+//  echo '<td class="link"><a href="'.$this->webroot.'/download/?items='.$package->getItemId().'">Download</a></td></tr>';
+//} ?>
+    </tbody>
+  </table>
+  <div id="dataTableLoading">
+    <img alt="" src="<?php echo  $this->coreWebroot?>/public/images/icons/loading.gif" />
+  </div>
 </div>
 
 <?php echo $this->render('index/viewsidebar.phtml') ?>

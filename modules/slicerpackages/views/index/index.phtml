@@ -16,7 +16,7 @@ $this->headScript()->appendFile(
 $this->headScript()->appendFile(
   $this->moduleWebroot . '/public/js/index/slicerpackages.index.js');
 ?>
-<link type="text/css" rel="stylesheet" href="<?php echo $this->moduleWebroot?>/public/css/slicerpackages.index.css" />
+<link type="text/css" rel="stylesheet" href="<?php echo $this->moduleWebroot.'/public/css/'.$this->moduleName ?>.index.css" />
 <div class="viewMain">
   <h3>Slicer Packages</h3>
   <div>

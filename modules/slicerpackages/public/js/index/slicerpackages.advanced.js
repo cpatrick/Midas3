@@ -1,3 +1,11 @@
+
+// Ideally this mapping should be done once in the controller, it would then be available to both 
+// the javascript and the view.
+var client_os_map = { 'Windows' : 'win', 'Mac OSX' : 'macosx', 'GNU/Linux' : 'linux' };
+var client_os_map_r = {}; $.map(client_os_map, function(val, idx){client_os_map_r[val] = idx});
+var client_arch_map = { '32-bit' : 'i386', '64-bit' : 'amd64' };
+var client_arch_map_r = {}; $.map(client_arch_map, function(val, idx){client_arch_map_r[val] = idx});
+
 var currentOs = '';
 var currentArch = '';
 var currentBuild = '';
@@ -40,7 +48,7 @@ function fillDataTable(os, arch, build)
         //};
 
         var tablecontent = '';
-        $.each(json.data, function (key, val) {
+        $.each(data.data, function (key, val) {
           tablecontent += '<tr>';
           //tablecontent += $.tmpl(templates.td, {cell: val.item_id});
           //tablecontent += $.tmpl(templates.td_os, {cell: val.os});
@@ -49,8 +57,8 @@ function fillDataTable(os, arch, build)
           //tablecontent += $.tmpl(templates.td, {cell: val.revision});
           //tablecontent += $.tmpl(templates.td_download, {cell: val.item_id});
           tablecontent += '  <td>' + val.item_id + '</td>';
-          tablecontent += '  <td class="os ' + val.os + '">' + val.os + '</td>';
-          tablecontent += '  <td>' + val.arch + '</td>';
+          tablecontent += '  <td class="os ' + val.os + '">' + client_os_map_r[val.os] + '</td>';
+          tablecontent += '  <td>' + client_arch_map_r[val.arch] + '</td>';
           tablecontent += '  <td>' + val.submissiontype + '</td>';
           tablecontent += '  <td>' + val.revision + '</td>';
           tablecontent += '  <td class="link">'
@@ -58,9 +66,8 @@ function fillDataTable(os, arch, build)
           tablecontent += '  </td>';
           tablecontent += '</tr>';
         });
-        
+
         $('#dataTableContent').html(tablecontent);
-        $("#dataTableLoading").hide();
         }
       });
     currentOs = os;
@@ -71,13 +78,12 @@ function fillDataTable(os, arch, build)
 
 $(document).ready(function() {
   $('#dataTable').tablesorter();
-  
-  var client_os_map = { 'Windows' : 'win', 'Mac' : 'macosx', 'Linux' : 'linux' };
+
   $('span.choice [type="radio"][name="osGroup"][value="' + client_os_map[$.client.os] + '"]').prop("checked", "checked");
-  
-  var client_arch_map = { '32-bit' : 'i386', '64-bit' : 'amd64' };
+
   $('span.choice [type="radio"][name="archGroup"][value="' + client_arch_map[$.client.arch] + '"]').prop("checked", "checked");
-  
+
   $('span.choice [type="radio"]').click(function(){fillDataTable(); });
   fillDataTable();
   });
+

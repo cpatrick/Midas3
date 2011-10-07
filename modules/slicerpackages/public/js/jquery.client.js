@@ -103,7 +103,7 @@
       {
         string: navigator.platform,
         subString: "Mac",
-        identity: "Mac"
+        identity: "Mac OSX"
       },
       {
         string: navigator.userAgent,
@@ -113,7 +113,7 @@
       {
         string: navigator.platform,
         subString: "Linux",
-        identity: "Linux"
+        identity: "GNU/Linux"
       }
     ], 
     dataArch : [

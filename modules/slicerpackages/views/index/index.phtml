@@ -22,12 +22,16 @@ $this->headScript()->appendFile(
 <?php
   foreach($this->packageSets as $folderName => $packageSet)
     {
-    echo '<div class="releasefolder"><h3>'.$folderName.'</h3>';
-    foreach($packageSet as $name => $package)
+    if(count($packageSet))
       {
-      echo '<a href='.$this->webroot.'/download/?items='.$package->getItemId().'>'.$name.'</a><br />';
+      echo '<div class="releasefolder">';
+      echo '  <h3>'.$folderName.'</h3>';
+      foreach($packageSet as $name => $package)
+        {
+        echo '  <a href='.$this->webroot.'/download/?items='.$package->getItemId().'>'.$name.'</a><br />';
+        }
+      echo '<br /></div>';
       }
-    echo '<br /></div>';
     }
 ?>
   </div>

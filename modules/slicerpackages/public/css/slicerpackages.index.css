@@ -10,10 +10,43 @@ div#messages {
 }
 
 div.releasefolder {
-  border-top: 1px dotted #000;
+  /*border-top: 1px dotted #333;*/
+  clear: left;
+  align: center;
 }
 
 div.releasefolder h3 {
   padding: 0px;
   margin: 0px;
+}
+
+div.packageTile {
+  height: 15ex;
+  width: 32%;
+  border: 1px dotted #999;
+  margin: 1px;
+  float: left;
+  background-repeat: no-repeat;
+  background-position: top left;
+}
+
+div.packageTile div {
+  padding-left: 19px;
+}
+
+div.packageTile div.packageLinks {
+  padding-top: 2ex;
+  padding-bottom: 5ex;
+}
+
+div.linux {
+  background-image:url('../images/os_linux.png');
+}
+
+div.win {
+  background-image:url('../images/os_win.png');
+}
+
+div.macosx {
+  background-image:url('../images/os_macosx.png');
 }

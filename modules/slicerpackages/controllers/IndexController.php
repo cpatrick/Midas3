@@ -63,7 +63,11 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
             $package = $this->Slicerpackages_Package->getByItemId($item->getKey());
             if($package)
               {
-              $this->view->packageSets[$subFolder->getName()][$item->getName()] = $package;
+              if(!isset($this->view->packageSets[$subFolder->getName()][$package->getOs()]))
+                {
+                $this->view->packageSets[$subFolder->getName()][$package->getOs()] = array();
+                }
+              $this->view->packageSets[$subFolder->getName()][$package->getOs()][$item->getName()] = $package;
               }
             }
           }

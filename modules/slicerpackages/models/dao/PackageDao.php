@@ -17,4 +17,5 @@ class Slicerpackages_PackageDao extends AppDao
   {
   public $_model = 'Package';
   public $_module = 'slicerpackages';
+
   }

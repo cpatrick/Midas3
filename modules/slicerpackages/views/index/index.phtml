@@ -20,22 +20,25 @@ $this->headScript()->appendFile(
 <div class="viewMain">
   <div>
 <?php
-  foreach($this->packageSets as $folderName => $packageSet)
+  foreach($this->packageSets as $folderName => $packageSuperset)
     {
-    if(count($packageSet))
+    echo '<div class="releasefolder">';
+    echo '  <h3>'.$folderName.'</h3>';
+    echo '<div class="releasefolder"><h3>'.$folderName.'</h3>';
+    foreach($packageSuperset as $os => $packageSet)
       {
-      echo '<div class="releasefolder">';
-      echo '  <h3>'.$folderName.'</h3>';
       foreach($packageSet as $name => $package)
         {
-        echo '  <a href='.$this->webroot.'/download/?items='.$package->getItemId().'>'.$name.'</a><br />';
+        echo '<div class="packageTile '.$os.'">';
+        echo '<a href='.$this->webroot.'/download/?items='.$package->getItemId().'>'.$name.'</a>';
+        echo '</div>';
         }
-      echo '<br /></div>';
       }
+    echo '</div>';
     }
 ?>
   </div>
 </div>
 
-<?php echo $this->render('index/viewsidebar.phtml') ?>
+<?php echo $this->render('index/viewsidebar.phtml'); ?>
 

@@ -14,12 +14,15 @@ PURPOSE.  See the above copyright notices for more information.
 $this->headScript()->appendFile(
   $this->apiWebroot . '/public/js/common/common.ajaxapi.js');
 $this->headScript()->appendFile(
-  $this->moduleWebroot . '/public/js/index/slicerpackages.index.js');
+  $this->moduleWebroot . '/public/js/index/'.$this->moduleName.'.index.js');
 ?>
 <link type="text/css" rel="stylesheet" href="<?php echo $this->moduleWebroot.'/public/css/'.$this->moduleName ?>.index.css" />
 <div class="viewMain">
   <div>
 <?php
+  $osMapping = array('win' => 'Windows', 'macosx' => 'Mac OSX', 'linux' => 'GNU/Linux');
+  $archMapping = array('i386' => '32-bit', 'amd64' => '64-bit');
+    
   foreach($this->packageSets as $folderName => $packageSuperset)
     {
     echo '<div class="releasefolder">';
@@ -27,29 +30,13 @@ $this->headScript()->appendFile(
     foreach($packageSuperset as $os => $packageSet)
       {
       echo '  <div class="packageTile '.$os.'">';
-      if($os == 'win')
-        {
-        echo '    <div>Windows</div>';
-        }
-      elseif($os == 'macosx')
-        {
-        echo '    <div>Mac OSX</div>';
-        }
-      else
-        {
-        echo '    <div>Linux</div>';
-        }
-      echo '<div class="packageLinks">';
+      echo '    <div>'.$osMapping[$os].'</div>';
+      echo '    <div class="packageLinks">';
       foreach($packageSet as $name => $package)
         {
-        $friendlyArch = '64-bit';
-        if($package->getArch() == 'i386')
-          {
-          $friendlyArch = '32-bit';
-          }
-        echo '    <a href='.$this->webroot.'/download/?items='.$package->getItemId().'>Download '.$friendlyArch.'</a><br/>';
+        echo '    <a href='.$this->webroot.'/download/?items='.$package->getItemId().'>Download '.$archMapping[$package->getArch()].'</a><br/>';
         }
-      echo '  </div>';
+      echo '    </div>';
       echo '  </div>';
       }
     echo '</div>';

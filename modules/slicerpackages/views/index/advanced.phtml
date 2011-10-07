@@ -19,6 +19,7 @@ $this->headScript()->appendFile(
   $this->moduleWebroot . '/public/js/index/slicerpackages.advanced.js');
 ?>
 <link type="text/css" rel="stylesheet" href="<?php echo $this->moduleWebroot?>/public/css/slicerpackages.advanced.css" />
+<link type="text/css" rel="stylesheet" href="<?php echo $this->moduleWebroot?>/public/css/style.css" />
 <div class="viewMain">
   <h3>Slicer Packages (Advanced)</h3>
   <div>
@@ -74,7 +75,7 @@ $this->headScript()->appendFile(
           <th>Build Type</th>
           <th>Revision</th>
           <th>Link</th>
-       </tr>
+        </tr>
       </thead>
       <tbody>
 <?php foreach( $this->packages as $package )

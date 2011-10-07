@@ -6,8 +6,8 @@ span.choice {
 span.choice > span:not([class="any"]), #dataTable td.link a, #dataTable td.os {
   padding-left: 20px;
   background-repeat: no-repeat;
-  //padding-top: 1.5px;
   background-position: left center;
+  vertical-align: middle;
 }
 
 span.choice > span.linux, #dataTable td.linux {

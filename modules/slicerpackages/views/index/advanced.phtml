@@ -20,9 +20,11 @@ $this->headScript()->appendFile(
 $this->headScript()->appendFile(
   $this->moduleWebroot . '/public/js/index/slicerpackages.advanced.js');
 ?>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->moduleWebroot.'/public/css/'.$this->moduleName ?>.css" />
 <link type="text/css" rel="stylesheet" href="<?php echo $this->moduleWebroot.'/public/css/'.$this->moduleName ?>.advanced.css" />
 <link type="text/css" rel="stylesheet" href="<?php echo $this->moduleWebroot?>/public/css/style.css" />
 <div class="viewMain">
+  <!--<h3>Search packages</h3>-->
   <div>
     <form id="osRaidos">
       <h4>Operating System</h4>

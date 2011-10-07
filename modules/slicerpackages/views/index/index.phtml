@@ -16,29 +16,32 @@ $this->headScript()->appendFile(
 $this->headScript()->appendFile(
   $this->moduleWebroot . '/public/js/index/'.$this->moduleName.'.index.js');
 ?>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->moduleWebroot.'/public/css/'.$this->moduleName ?>.css" />
 <link type="text/css" rel="stylesheet" href="<?php echo $this->moduleWebroot.'/public/css/'.$this->moduleName ?>.index.css" />
 <div class="viewMain">
+  <h3>Download packages</h3>
   <div>
 <?php
   $osMapping = array('win' => 'Windows', 'macosx' => 'Mac OSX', 'linux' => 'GNU/Linux');
   $archMapping = array('i386' => '32-bit', 'amd64' => '64-bit');
-    
+  $firstReleaseFolder = true;
   foreach($this->packageSets as $folderName => $packageSuperset)
     {
-    echo '<div class="releasefolder">';
+    echo '<div class="releaseFolder'.($firstReleaseFolder ? ' firstReleaseFolder' : '').'">';
     echo '  <h3>'.$folderName.'</h3>';
     foreach($packageSuperset as $os => $packageSet)
       {
-      echo '  <div class="packageTile '.$os.'">';
-      echo '    <div>'.$osMapping[$os].'</div>';
-      echo '    <div class="packageLinks">';
+      echo '  <div class="packageTile">';
+      echo '    <div class="packageOS '.$os.'">'.$osMapping[$os].'</div>';
+      echo '    <ul class="packageLinks">';
       foreach($packageSet as $name => $package)
         {
-        echo '    <a href='.$this->webroot.'/download/?items='.$package->getItemId().'>Download '.$archMapping[$package->getArch()].'</a><br/>';
+        echo '    <li><a href='.$this->webroot.'/download/?items='.$package->getItemId().'>Download '.$archMapping[$package->getArch()].'</a></li>';
         }
-      echo '    </div>';
+      echo '    </ul>';
       echo '  </div>';
       }
+    $firstReleaseFolder = false;
     echo '</div>';
     }
 ?>

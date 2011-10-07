@@ -2,3 +2,31 @@ span.choice {
   display: inline-block;
   width: 10em;
 }
+
+span.choice > span:not([class="any"]), #dataTable td.link a, #dataTable td.os {
+  padding-left: 20px;
+  background-repeat: no-repeat;
+  //padding-top: 1.5px;
+  background-position: left center;
+}
+
+span.choice > span.linux, #dataTable td.linux {
+  background-image: url(../images/os_linux.png);
+}
+
+span.choice > span.macosx, #dataTable td.macosx {
+  background-image: url(../images/os_macosx.png);
+}
+
+span.choice > span.win, #dataTable td.win {
+  background-image: url(../images/os_win.png);
+}
+
+#dataTable {
+  margin-top: 3em;
+}
+
+#dataTable td.link a {
+  background-image: url(../../../../core/public/images/icons/download.png);
+}
+

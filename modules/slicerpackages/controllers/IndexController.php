@@ -21,10 +21,33 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
   public $_moduleComponents = array();
   public $_forms = array();
   public $_moduleForms = array();
+  
+  /** Helper function allowing to generate breadcrumb */
+  private function _breadcrumb($subfolder = "", $prettyName = "")
+    {
+    // TODO Generalize the concept of 'breadcrumb' for plugins ? Look at Zend BreadCrumb ?
+    // TODO Generalize the concept of petty name for plugin (i.e. 'Slicer Packages' in addition to 'slicerpackages')
+    $breadcrumb  = '<link type="text/css" rel="stylesheet" href="'.$this->view->coreWebroot.'/public/css/common/common.browser.css" />';
+    $breadcrumb .= '<link type="text/css" rel="stylesheet" href="'.$this->view->coreWebroot.'/public/css/folder/folder.view.css" />';
+    $breadcrumb .= '<ul class="pathBrowser">';
+    $breadcrumb .= '  <li class ="pathCommunity"><img alt = "" src = "'.$this->view->moduleWebroot.'/public/images/'.$this->moduleName.'.png" /><span><a href="'.$this->view->webroot.'/'.$this->moduleName.'">Slicer Packages</a></span></li>';
+    if($subfolder != "")
+      {
+      if($prettyName == "")
+        {
+        $prettyName = $subfolder;
+        }
+      $breadcrumb .= '  <li class ="pathFolder"><img alt = "" src = "'.$this->view->moduleWebroot.'/public/images/'.$this->moduleName.'_'.$subfolder.'.png" /><span><a href="'.$this->view->webroot.'/'.$this->moduleName.'/'.$subfolder.'">'.$prettyName.'</a></span></li>';
+      }
+    $breadcrumb .= '</ul>';
+    return $breadcrumb;
+    }
 
   /** index action*/
   public function indexAction()
     {
+    $this->view->header = $this->_breadcrumb();
+    
     $this->view->nPackages = count($this->Slicerpackages_Package->getAll());
     $community = $this->Community->getByName('Slicer');
     $folders = $community->getPublicFolder()->getFolders();
@@ -89,6 +112,7 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
 
   public function advancedAction()
     {
+    $this->view->header = $this->_breadcrumb("advanced", "Search");
     $this->view->packages = $this->Slicerpackages_Package->getAll();
     $this->view->nPackages = count($this->view->packages);
     }

@@ -26,11 +26,10 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
   private function _breadcrumb($subfolder = "", $prettyName = "")
     {
     // TODO Generalize the concept of 'breadcrumb' for plugins ? Look at Zend BreadCrumb ?
-    // TODO Generalize the concept of petty name for plugin (i.e. 'Slicer Packages' in addition to 'slicerpackages')
     $breadcrumb  = '<link type="text/css" rel="stylesheet" href="'.$this->view->coreWebroot.'/public/css/common/common.browser.css" />';
     $breadcrumb .= '<link type="text/css" rel="stylesheet" href="'.$this->view->coreWebroot.'/public/css/folder/folder.view.css" />';
     $breadcrumb .= '<ul class="pathBrowser">';
-    $breadcrumb .= '  <li class ="pathCommunity"><img alt = "" src = "'.$this->view->moduleWebroot.'/public/images/'.$this->moduleName.'.png" /><span><a href="'.$this->view->webroot.'/'.$this->moduleName.'">Slicer Packages</a></span></li>';
+    $breadcrumb .= '  <li class ="pathCommunity"><img alt = "" src = "'.$this->view->moduleWebroot.'/public/images/'.$this->moduleName.'.png" /><span><a href="'.$this->view->webroot.'/'.$this->moduleName.'">'.$this->view->moduleFullName.'</a></span></li>';
     if($subfolder != "")
       {
       if($prettyName == "")

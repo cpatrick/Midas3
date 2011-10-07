@@ -1,7 +1,7 @@
 var currentOs = '';
 var currentArch = '';
 var currentBuild = '';
-  
+
 function fillDataTable(os, arch, build)
   {
   if(typeof(os) == 'undefined')
@@ -26,18 +26,19 @@ function fillDataTable(os, arch, build)
     if(os != 'any') { parameters+= '&os=' + os; }
     if(arch != 'any') { parameters+= '&arch=' + arch; }
     if(build != 'any') { parameters+= '&submissiontype=' + build; }
-    $.ajax({
-      url: webroot + '/api/json?method=midas.slicerpackages.get.packages' + parameters,
-      contentType: "application/x-www-form-urlencoded;charset=ISO-8859-15",
+    ajaxWebApi.ajax({
+      method: 'midas.slicerpackages.get.packages',
+      args: parameters,
+      complete: function() {
+        $("#dataTableLoading").hide();
+        },
       success: function(data) {
-        json = $.parseJSON(data);
-        
         //var templates = {
         //  td : '  <td>#{td}</td>',
         //  td_os : '  <td class="os #{cell}">#{cell}</td>',
         //  td_download : '<td class="link"><a href="' + webroot + '/download/?items=#{cell}">Download</a></td>'
         //};
-        
+
         var tablecontent = '';
         $.each(json.data, function (key, val) {
           tablecontent += '<tr>';

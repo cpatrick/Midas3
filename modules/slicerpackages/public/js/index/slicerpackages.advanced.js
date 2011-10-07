@@ -70,6 +70,13 @@ function fillDataTable(os, arch, build)
 
 $(document).ready(function() {
   $('#dataTable').tablesorter();
+  
+  var client_os_map = { 'Windows' : 'win', 'Mac' : 'macosx', 'Linux' : 'linux' };
+  $('span.choice [type="radio"][name="osGroup"][value="' + client_os_map[$.client.os] + '"]').prop("checked", "checked");
+  
+  var client_arch_map = { '32-bit' : 'i386', '64-bit' : 'amd64' };
+  $('span.choice [type="radio"][name="archGroup"][value="' + client_arch_map[$.client.arch] + '"]').prop("checked", "checked");
+  
   $('span.choice [type="radio"]').click(function(){fillDataTable(); });
   fillDataTable();
   });

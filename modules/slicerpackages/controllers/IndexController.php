@@ -23,20 +23,20 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
   public $_moduleForms = array();
   
   /** Helper function allowing to generate breadcrumb */
-  private function _breadcrumb($subfolder = "", $prettyName = "")
+  private function _breadcrumb($subfolder = "", $name = "")
     {
     // TODO Generalize the concept of 'breadcrumb' for plugins ? Look at Zend BreadCrumb ?
     $breadcrumb  = '<link type="text/css" rel="stylesheet" href="'.$this->view->coreWebroot.'/public/css/common/common.browser.css" />';
     $breadcrumb .= '<link type="text/css" rel="stylesheet" href="'.$this->view->coreWebroot.'/public/css/folder/folder.view.css" />';
     $breadcrumb .= '<ul class="pathBrowser">';
-    $breadcrumb .= '  <li class ="pathCommunity"><img alt = "" src = "'.$this->view->moduleWebroot.'/public/images/'.$this->moduleName.'.png" /><span><a href="'.$this->view->webroot.'/'.$this->moduleName.'">'.$this->view->moduleFullName.'</a></span></li>';
+    $breadcrumb .= '  <li class ="pathCommunity"><img alt = "" src = "'.$this->view->moduleWebroot.'/public/images/'.$this->moduleName.'.png" /><span><a href="'.$this->view->webroot.'/'.$this->moduleName.'">&nbsp;'.$this->view->moduleFullName.'</a></span></li>';
     if($subfolder != "")
       {
-      if($prettyName == "")
+      if($name == "")
         {
-        $prettyName = $subfolder;
+        $name = $subfolder;
         }
-      $breadcrumb .= '  <li class ="pathFolder"><img alt = "" src = "'.$this->view->moduleWebroot.'/public/images/'.$this->moduleName.'_'.$subfolder.'.png" /><span><a href="'.$this->view->webroot.'/'.$this->moduleName.'/'.$subfolder.'">'.$prettyName.'</a></span></li>';
+      $breadcrumb .= '  <li class ="pathFolder"><img alt = "" src = "'.$this->view->moduleWebroot.'/public/images/'.$this->moduleName.'_'.$subfolder.'.png" /><span><a href="'.$this->view->webroot.'/'.$this->moduleName.'/'.$subfolder.'">&nbsp;'.$name.'</a></span></li>';
       }
     $breadcrumb .= '</ul>';
     return $breadcrumb;

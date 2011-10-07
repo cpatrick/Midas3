@@ -95,14 +95,15 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
                                                       MIDAS_COMMUNITY_PUBLIC,
                                                       $userDao,
                                                       true);
+                                                      
+    $this->Folder->createFolder('Release',
+                                'For Release Builds',
+                                $communityDao->getPublicFolder());
     $this->Folder->createFolder('Nightly',
                                 'For Nightly Builds',
                                 $communityDao->getPublicFolder());
     $this->Folder->createFolder('Experimental',
                                 'For Experimental Builds',
-                                $communityDao->getPublicFolder());
-    $this->Folder->createFolder('Release',
-                                'For Release Builds',
                                 $communityDao->getPublicFolder());
     echo json_encode(array('msg' => 'Slicer Community created successfully!',
                            'stat' => 1));
@@ -114,6 +115,13 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
     $this->view->header = $this->_breadcrumb("advanced", "Search");
     $this->view->packages = $this->Slicerpackages_Package->getAll();
     $this->view->nPackages = count($this->view->packages);
+    $community = $this->Community->getByName('Slicer');
+    $folders = array();
+    foreach($community->getPublicFolder()->getFolders() as $folder)
+      {
+      array_push($folders, $folder->getName());
+      }
+    $this->view->folders = $folders;
     }
 
 }//end class

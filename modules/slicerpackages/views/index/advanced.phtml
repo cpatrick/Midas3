@@ -54,15 +54,14 @@ $this->headScript()->appendFile(
       <span class="choice">
         <input type="radio" name="buildGroup" value="any" checked>Any
       </span>
-      <span class="choice">
-        <input type="radio" name="buildGroup" value="stable">Stable
-      </span>
-      <span class="choice">
-        <input type="radio" name="buildGroup" value="nightly">Nightly
-      </span>
-      <span class="choice">
-        <input type="radio" name="buildGroup" value="experimental">Experimental
-      </span>
+      <?php
+      foreach($this->folders as $folder)
+        {
+        echo '<span class="choice">';
+        echo '  <input type="radio" name="buildGroup" value="'.strtolower($folder).'">'.$folder;
+        echo '</span>';
+        }
+      ?>
     </form>
   </div>
     <table id="dataTable" class="tablesorter">

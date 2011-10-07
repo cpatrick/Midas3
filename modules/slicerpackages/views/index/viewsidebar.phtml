@@ -1,0 +1,38 @@
+<!-- ViewSideBar -->
+<div class="viewSideBar">
+
+  <div align="justify" class='sideElementFirst feedNotification'>
+  This plugin enables the download of slicer packages in a nice, user-friendly
+  way.
+  </div>
+
+  <div class="sideElementLast genericAction">
+    <h1><?php echo $this->t('Actions'); ?></h1>
+    <ul>
+      <?php
+      echo '  <li class = "viewAction">';
+      echo '    <a href = "'.$this->webroot.'/'.$this->moduleName.'/advanced">';
+      echo '      <img alt = "" src = "'.$this->moduleWebroot.'/public/images/'.$this->moduleName.'_advanced.png"/>';
+      echo '      <span>'.$this->t('Search packages').'</span>';
+      echo '    </a>';
+      echo '  </li>';
+      echo '  <li>';
+      echo '    <a href = "'.$this->webroot.'/'.$this->moduleName.'/stats">';
+      echo '      <img alt = "" src = "'.$this->moduleWebroot.'/public/images/'.$this->moduleName.'_stats.png" />';
+      echo '      <span>'.$this->t('Show download stats').'</span>';
+      echo '    </a>';
+      echo '  </li>';
+      ?>
+    </ul>
+  </div>
+
+  <div class="sideElementLast feedStats">
+    <h1>Stats</h1>
+    <?php
+    echo "<ul>";
+    echo "  <li>{$this->nPackages} {$this->t('package')}".(($this->nPackages>1)?'s':'')."</li>";
+    echo "</ul>";
+    ?>
+  </div>
+</div>
+<!-- End ViewSideBar -->

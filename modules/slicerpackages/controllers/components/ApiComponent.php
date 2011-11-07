@@ -14,6 +14,8 @@ PURPOSE.  See the above copyright notices for more information.
 class Slicerpackages_ApiComponent extends AppComponent
 {
 
+  public $controller;
+
   /**
    * Helper function for verifying keys in an input array
    */
@@ -35,7 +37,7 @@ class Slicerpackages_ApiComponent extends AppComponent
     {
     $componentLoader = new MIDAS_ComponentLoader();
     $authComponent = $componentLoader->loadComponent('Authentication', 'api');
-    return $authComponent->getUser($args, $this->userSession->Dao);
+    return $authComponent->getUser($args, null);
     }
 
   /**

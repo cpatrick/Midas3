@@ -15,8 +15,8 @@ require_once BASE_PATH . '/modules/api/library/APIEnabledNotification.php';
 class Slicerpackages_Notification extends ApiEnabled_Notification
   {
   public $moduleName = 'slicerpackages';
-  public $_moduleComponents=array('Api');
-  public $_models=array();
+  public $_moduleComponents = array('Api');
+  public $_models = array();
 
   /** init notification process*/
   public function init()

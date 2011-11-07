@@ -50,6 +50,7 @@ class Slicerpackages_ApiComponent extends AppComponent
    */
   public function uploadPackage($args)
     {
+    set_time_limit(0);
     $this->_checkKeys(array('os',
                             'arch',
                             'name',

@@ -13,7 +13,7 @@ PURPOSE.  See the above copyright notices for more information.
 class Slicerpackages_IndexController extends Slicerpackages_AppController
 {
 
-  public $_models = array('User', 'Item', 'Folder', 'Community');
+  public $_models = array('User', 'Item', 'Folder', 'Community', 'Folderpolicyuser', 'Folderpolicygroup');
   public $_moduleModels = array('Package');
   public $_daos = array('User', 'Item', 'Folder', 'Community');
   public $_moduleDaos = array('Package');
@@ -21,7 +21,7 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
   public $_moduleComponents = array();
   public $_forms = array();
   public $_moduleForms = array();
-  
+
   /** Helper function allowing to generate breadcrumb */
   private function _breadcrumb($subfolder = "", $name = "")
     {
@@ -46,7 +46,7 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
   public function indexAction()
     {
     $this->view->header = $this->_breadcrumb();
-    
+
     $this->view->nPackages = count($this->Slicerpackages_Package->get());
     $community = $this->Community->getByName('Slicer');
     $folders = $community->getPublicFolder()->getFolders();
@@ -99,16 +99,28 @@ class Slicerpackages_IndexController extends Slicerpackages_AppController
                                                       MIDAS_COMMUNITY_PUBLIC,
                                                       $userDao,
                                                       true);
-                                                      
-    $this->Folder->createFolder('Release',
-                                'For Release Builds',
-                                $communityDao->getPublicFolder());
-    $this->Folder->createFolder('Nightly',
-                                'For Nightly Builds',
-                                $communityDao->getPublicFolder());
-    $this->Folder->createFolder('Experimental',
-                                'For Experimental Builds',
-                                $communityDao->getPublicFolder());
+
+    $parent = $communityDao->getPublicFolder();
+    $policyGroup = $parent->getFolderpolicygroup();
+    $policyUser = $parent->getFolderpolicyuser();
+
+    $folders = array();
+    $folders[] = $this->Folder->createFolder('Release', 'For Release Builds', $parent);
+    $folders[] = $this->Folder->createFolder('Nightly', 'For Nightly Builds', $parent);
+    $folders[] = $this->Folder->createFolder('Experimental', 'For Experimental Builds', $parent);
+
+    // Copy parent permissions to the new folders
+    foreach($folders as $folder)
+      {
+      foreach($policyGroup as $policy)
+        {
+        $this->Folderpolicygroup->createPolicy($policy->getGroup(), $folder, $policy->getPolicy());
+        }
+      foreach($policyUser as $policy)
+        {
+        $this->Folderpolicyuser->createPolicy($policy->getUser(), $folder, $policy->getPolicy());
+        }
+      }
     echo json_encode(array('msg' => 'Slicer Community created successfully!',
                            'stat' => 1));
     exit();

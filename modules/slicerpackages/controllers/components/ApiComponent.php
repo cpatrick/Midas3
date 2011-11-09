@@ -14,8 +14,6 @@ PURPOSE.  See the above copyright notices for more information.
 class Slicerpackages_ApiComponent extends AppComponent
 {
 
-  public $controller;
-
   /**
    * Helper function for verifying keys in an input array
    */
@@ -153,7 +151,8 @@ class Slicerpackages_ApiComponent extends AppComponent
                          'arch' => $dao->getArch(),
                          'revision' => $dao->getRevision(),
                          'submissiontype' => $dao->getSubmissiontype(),
-                         'package' => $dao->getPackagetype());
+                         'package' => $dao->getPackagetype(),
+                         'name' => $dao->getItem()->getName());
       }
     return $results;
     }

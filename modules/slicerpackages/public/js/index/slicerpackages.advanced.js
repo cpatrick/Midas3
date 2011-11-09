@@ -3,7 +3,7 @@
 // the javascript and the view.
 var client_os_map = { 'Windows' : 'win', 'Mac OSX' : 'macosx', 'GNU/Linux' : 'linux' };
 var client_os_map_r = {}; $.map(client_os_map, function(val, idx){client_os_map_r[val] = idx});
-var client_arch_map = { '32-bit' : 'i386', '64-bit' : 'amd64' };
+var client_arch_map = { '32-bit' : 'i386', '64-bit' : 'amd64', '?' : 'unknown' };
 var client_arch_map_r = {}; $.map(client_arch_map, function(val, idx){client_arch_map_r[val] = idx});
 
 var currentOs = '';
@@ -26,7 +26,6 @@ function fillDataTable(os, arch, build)
     }
   if(currentOs != os || currentArch != arch || currentBuild != build)
     {
-    //alert('clicked os:' + os + ', arch:' + arch + ', build:' + build);
     $('#dataTableContent').html("");
     $("#dataTableLoading").show();
     webroot = $('.webroot').val();
@@ -50,20 +49,13 @@ function fillDataTable(os, arch, build)
         var tablecontent = '';
         $.each(data.data, function (key, val) {
           tablecontent += '<tr>';
-          //tablecontent += $.tmpl(templates.td, {cell: val.item_id});
-          //tablecontent += $.tmpl(templates.td_os, {cell: val.os});
-          //tablecontent += $.tmpl(templates.td, {cell: val.arch});
-          //tablecontent += $.tmpl(templates.td, {cell: val.submissiontype});
-          //tablecontent += $.tmpl(templates.td, {cell: val.revision});
-          //tablecontent += $.tmpl(templates.td_download, {cell: val.item_id});
-          tablecontent += '  <td>' + val.item_id + '</td>';
+          tablecontent += '  <td>';
+          tablecontent += '    <a href="' + webroot + '/item/' + val.item_id + '">' + val.name + '</a>';
+          tablecontent += '  </td>';
           tablecontent += '  <td class="os ' + val.os + '">' + client_os_map_r[val.os] + '</td>';
           tablecontent += '  <td>' + client_arch_map_r[val.arch] + '</td>';
           tablecontent += '  <td>' + val.submissiontype + '</td>';
           tablecontent += '  <td>' + val.revision + '</td>';
-          tablecontent += '  <td class="link">'
-          tablecontent += '    <a href="' + webroot + '/download/?items=' + val.item_id + '">Download</a>';
-          tablecontent += '  </td>';
           tablecontent += '</tr>';
         });
 

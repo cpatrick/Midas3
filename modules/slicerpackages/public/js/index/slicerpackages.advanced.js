@@ -60,6 +60,8 @@ function fillDataTable(os, arch, build)
         });
 
         $('#dataTableContent').html(tablecontent);
+        // let the sorting plugin know that we made a update
+        $('#dataTable').trigger('update');
         }
       });
     currentOs = os;

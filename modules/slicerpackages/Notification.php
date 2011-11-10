@@ -21,9 +21,22 @@ class Slicerpackages_Notification extends ApiEnabled_Notification
   /** init notification process*/
   public function init()
     {
+    $this->addCallBack('CALLBACK_CORE_GET_LEFT_LINKS', 'getLeftLinks');
+
     $this->enableWebAPI($this->moduleName);
     }//end init
 
+  /**
+   * Add the link to this module to the left side list
+   */
+  public function getLeftLinks()
+    {
+    $baseUrl = Zend_Controller_Front::getInstance()->getBaseUrl();
+    $moduleWebroot = $baseUrl.'/'.$this->moduleName;
+    return array('Slicer Packages' => array(
+      $moduleWebroot.'/index',
+      $baseUrl.'/modules/'.$this->moduleName.'/public/images/slicerpackages.png'));
+    }
   } //end class
   
 ?>

@@ -1,13 +1,21 @@
 <?php
 /*=========================================================================
-MIDAS Server
-Copyright (c) Kitware SAS. 20 rue de la Villette. All rights reserved.
-69328 Lyon, FRANCE.
+ MIDAS Server
+ Copyright (c) Kitware SAS. 26 rue Louis Guérin. 69100 Villeurbanne, FRANCE
+ All rights reserved.
+ More information http://www.kitware.com
 
-See Copyright.txt for details.
-This software is distributed WITHOUT ANY WARRANTY; without even
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-PURPOSE.  See the above copyright notices for more information.
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0.txt
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
 =========================================================================*/
 
 // Web API error codes
@@ -50,22 +58,54 @@ class Api_ApiComponent extends AppComponent
 
   /**
    * Get the server version
-   * @return Server version
+   * @return Server version in the form <major>.<minor>.<patch>
    */
   public function version($args)
     {
-    $data['version'] = Zend_Registry::get('configDatabase')->version;
+    return array('version' => Zend_Registry::get('configDatabase')->version);
+    }
+
+  /**
+   * Get the enabled modules on the server
+   * @return List of enabled modules on the server
+   */
+  public function modulesList($args)
+    {
+    return array('modules' => array_keys(Zend_Registry::get('configsModules')));
+    }
+
+  /**
+   * List all available web api methods on the server
+   * @return List of api method names and their corresponding documentation
+   */
+  public function methodsList($args)
+    {
+    $data = array();
+    $data['methods'] = array();
+
+    $apiMethods = Zend_Registry::get('notifier')->callback('CALLBACK_API_HELP', array());
+    foreach($apiMethods as $module => $methods)
+      {
+      foreach($methods as $method)
+        {
+        $apiMethodName = $module != 'api' ? $module.'.' : '';
+        $apiMethodName .= $method['name'];
+        $data['methods'][] = array('name' => $apiMethodName, 'help' => $method['help']);
+        }
+      }
     return $data;
     }
 
   /**
-   * Get the server information
+   * Get the server information including version, modules enabled,
+     and available web api methods (names do not include the global prefix)
    * @return Server information
    */
   public function info($args)
     {
-    $data['version'] = Zend_Registry::get('configDatabase')->version;
-    return $data;
+    return array_merge($this->version($args),
+                       $this->modulesList($args),
+                       $this->methodsList($args));
     }
 
   /**
@@ -232,7 +272,7 @@ class Api_ApiComponent extends AppComponent
           $revision->setUser_id($userDao->getKey());
           $revision->setDate(date('c'));
           $revision->setLicense(null);
-          $revision = $itemModel->addRevision($item, $revision);
+          $itemModel->addRevision($item, $revision);
           }
 
         $siblings = $revision->getBitstreams();
@@ -258,19 +298,25 @@ class Api_ApiComponent extends AppComponent
         }
       }
     //we don't already have this content, so create the token
-    $uploadApi = new KwUploadAPI($this->apiSetup);
-    return $uploadApi->generateToken($args, $userDao->getKey().'/'.$item->getKey());
+    $componentLoader = new MIDAS_ComponentLoader();
+    $uploadComponent = $componentLoader->loadComponent('Httpupload');
+    $uploadComponent->setTestingMode($this->apiSetup['testing']);
+    $uploadComponent->setTmpDirectory($this->apiSetup['tmpDirectory']);
+    return $uploadComponent->generateToken($args, $userDao->getKey().'/'.$item->getKey());
     }
 
   /**
-   * Get the offset of the current upload
-   * @token The upload token for the file
-   * @return The size of the file currently on the server
+   * Get the size of a partially completed upload
+   * @param uploadtoken The upload token for the file
+   * @return [offset] The size of the file currently on the server
    */
   function uploadGetoffset($args)
     {
-    $uploadApi = new KwUploadAPI($this->apiSetup);
-    return $uploadApi->getOffset($args);
+    $componentLoader = new MIDAS_ComponentLoader();
+    $uploadComponent = $componentLoader->loadComponent('Httpupload');
+    $uploadComponent->setTestingMode($this->apiSetup['testing']);
+    $uploadComponent->setTmpDirectory($this->apiSetup['tmpDirectory']);
+    return $uploadComponent->getOffset($args);
     }
 
   /**
@@ -329,7 +375,7 @@ class Api_ApiComponent extends AppComponent
           $revision->setUser_id($userDao->getKey());
           $revision->setDate(date('c'));
           $revision->setLicense(null);
-          $revision = $itemModel->addRevision($item, $revision);
+          $itemModel->addRevision($item, $revision);
           }
         }
       else
@@ -380,18 +426,22 @@ class Api_ApiComponent extends AppComponent
       }
 
     $mode = array_key_exists('mode', $args) ? $args['mode'] : 'stream';
-    $uploadApi = new KwUploadAPI($this->apiSetup);
+
+    $componentLoader = new MIDAS_ComponentLoader();
+    $httpUploadComponent = $componentLoader->loadComponent('Httpupload');
+    $httpUploadComponent->setTestingMode($this->apiSetup['testing']);
+    $httpUploadComponent->setTmpDirectory($this->apiSetup['tmpDirectory']);
 
     if(array_key_exists('testingmode', $args))
       {
-      $uploadApi->testing_enable = true;
-      $args['localinput'] = $this->apiSetup['tmp_directory'].'/'.$args['filename'];
+      $httpUploadComponent->setTestingMode(true);
+      $args['localinput'] = $this->apiSetup['tmpDirectory'].'/'.$args['filename'];
       }
 
-    // Use KWUploadApi to handle the actual file upload
+    // Use the Httpupload component to handle the actual file upload
     if($mode == 'stream')
       {
-      $result = $uploadApi->process($args);
+      $result = $httpUploadComponent->process($args);
 
       $filename = $result['filename'];
       $filepath = $result['path'];
@@ -416,21 +466,39 @@ class Api_ApiComponent extends AppComponent
       throw new Exception('Invalid upload mode', MIDAS_INVALID_PARAMETER);
       }
 
-    $componentLoader = new MIDAS_ComponentLoader();
+    if(array_key_exists('folderid', $args))
+      {
+      $validations = Zend_Registry::get('notifier')->callback('CALLBACK_CORE_VALIDATE_UPLOAD',
+                                                              array('filename' => $filename,
+                                                                    'size' => $filesize,
+                                                                    'path' => $filepath,
+                                                                    'folderId' => $args['folderid']));
+      foreach($validations as $validation)
+        {
+        if(!$validation['status'])
+          {
+          unlink($filepath);
+          throw new Exception($validation['message'], MIDAS_INVALID_POLICY);
+          }
+        }
+      }
     $uploadComponent = $componentLoader->loadComponent('Upload');
+    $license = null;
     if(isset($folder))
       {
-      $item = $uploadComponent->createUploadedItem($userDao, $filename, $filepath, $folder, '', $filemd5);
+      $item = $uploadComponent->createUploadedItem($userDao, $filename, $filepath, $folder, $license, $filemd5);
       }
     else if(isset($revision))
       {
-      $tmp = array($item->getKey(), $revision->getRevision()); //existing revision
-      $item = $uploadComponent->createNewRevision($userDao, $filename, $filepath, $tmp, '', null, $filemd5);
+      //an existing revision
+      $changes = '';
+      $item = $uploadComponent->createNewRevision($userDao, $filename, $filepath, $changes, $item->getKey(), $revision->getRevision(), $license, $filemd5);
       }
     else
       {
-      $tmp = array($item->getKey(), 99999); //new revision
-      $item = $uploadComponent->createNewRevision($userDao, $filename, $filepath, $tmp, '', null, $filemd5);
+      // a new revision
+      $changes = '';
+      $item = $uploadComponent->createNewRevision($userDao, $filename, $filepath, $changes, $item->getKey(), $revision, $license, $filemd5);
       }
 
     if(!$item)
@@ -658,7 +726,7 @@ class Api_ApiComponent extends AppComponent
    * @param description (Optional) The description of the folder
    * @param uuid (Optional) Uuid of the folder. If none is passed, will generate one.
    * @param privacy (Optional) Default 'Public'.
-   * @param parentid The id of the parent folder
+   * @param parentid The id of the parent folder. Set this to -1 to create a top level user folder.
    * @return The folder object that was created
    */
   function folderCreate($args)
@@ -673,7 +741,7 @@ class Api_ApiComponent extends AppComponent
     $modelLoader = new MIDAS_ModelLoader();
     $folderModel = $modelLoader->loadModel('Folder');
     $name = $args['name'];
-    $description = $args['description'];
+    $description = isset($args['description']) ? $args['description'] : '';
 
     $uuid = isset($args['uuid']) ? $args['uuid'] : '';
     $record = false;
@@ -707,27 +775,38 @@ class Api_ApiComponent extends AppComponent
         {
         throw new Exception('Parameter parentid is not defined', MIDAS_INVALID_PARAMETER);
         }
-      $folder = $folderModel->load($args['parentid']);
-      if($folder == false)
+      if($args['parentid'] == -1) //top level user folder being created
         {
-        throw new Exception('Parent doesn\'t exist', MIDAS_INVALID_PARAMETER);
+        $new_folder = $folderModel->createFolder($name, $description, $userDao->getFolderId(), $uuid);
         }
-      $new_folder = $folderModel->createFolder($name, $description, $folder, $uuid);
-      if($new_folder === false)
+      else //child of existing folder
         {
-        throw new Exception('Create folder failed', MIDAS_INTERNAL_ERROR);
-        }
-      $policyGroup = $folder->getFolderpolicygroup();
-      $policyUser = $folder->getFolderpolicyuser();
-      $folderpolicygroupModel = $modelLoader->loadModel('Folderpolicygroup');
-      $folderpolicyuserModel = $modelLoader->loadModel('Folderpolicygroup');
-      foreach($policyGroup as $policy)
-        {
-        $folderpolicygroupModel->createPolicy($policy->getGroup(), $new_folder, $policy->getPolicy());
-        }
-      foreach($policyUser as $policy)
-        {
-        $folderpolicyuserModel->createPolicy($policy->getUser(), $new_folder, $policy->getPolicy());
+        $folder = $folderModel->load($args['parentid']);
+        if($folder == false)
+          {
+          throw new Exception('Parent doesn\'t exist', MIDAS_INVALID_PARAMETER);
+          }
+        $new_folder = $folderModel->createFolder($name, $description, $folder, $uuid);
+        if($new_folder === false)
+          {
+          throw new Exception('Create folder failed', MIDAS_INTERNAL_ERROR);
+          }
+        $policyGroup = $folder->getFolderpolicygroup();
+        $policyUser = $folder->getFolderpolicyuser();
+        $folderpolicygroupModel = $modelLoader->loadModel('Folderpolicygroup');
+        $folderpolicyuserModel = $modelLoader->loadModel('Folderpolicyuser');
+        foreach($policyGroup as $policy)
+          {
+          $folderpolicygroupModel->createPolicy($policy->getGroup(), $new_folder, $policy->getPolicy());
+          }
+        foreach($policyUser as $policy)
+          {
+          $folderpolicyuserModel->createPolicy($policy->getUser(), $new_folder, $policy->getPolicy());
+          }
+        if(!$folderModel->policyCheck($new_folder, $userDao, MIDAS_POLICY_ADMIN))
+          {
+          $folderpolicyuserModel->createPolicy($userDao, $new_folder, MIDAS_POLICY_ADMIN);
+          }
         }
 
       return $new_folder->toArray();
@@ -859,11 +938,10 @@ class Api_ApiComponent extends AppComponent
       {
       throw new Exception('Cannot create item anonymously', MIDAS_INVALID_POLICY);
       }
-
     $modelLoader = new MIDAS_ModelLoader();
     $itemModel = $modelLoader->loadModel('Item');
     $name = $args['name'];
-    $description = $args['description'];
+    $description = isset($args['description']) ? $args['description'] : '';
 
     $uuid = isset($args['uuid']) ? $args['uuid'] : '';
     $record = false;
@@ -903,11 +981,17 @@ class Api_ApiComponent extends AppComponent
         {
         throw new Exception('Parent folder doesn\'t exist', MIDAS_INVALID_PARAMETER);
         }
+      if(!$folderModel->policyCheck($folder, $userDao, MIDAS_POLICY_WRITE))
+        {
+        throw new Exception('Invalid permissions on parent folder', MIDAS_INVALID_POLICY);
+        }
       $item = $itemModel->createItem($name, $description, $folder, $uuid);
       if($item === false)
         {
         throw new Exception('Create new item failed', MIDAS_INTERNAL_ERROR);
         }
+      $itempolicyuserModel = $modelLoader->loadModel('Itempolicyuser');
+      $itempolicyuserModel->createPolicy($userDao, $item, MIDAS_POLICY_ADMIN);
 
       return $item->toArray();
       }
@@ -1174,6 +1258,7 @@ class Api_ApiComponent extends AppComponent
    * @param id (Optional) The id of the bitstream
    * @param checksum (Optional) The checksum of the bitstream
    * @param name (Optional) Alternate filename to download as
+   * @param offset (Optional) The download offset in bytes (used for resume)
    */
   function bitstreamDownload($args)
     {
@@ -1220,9 +1305,11 @@ class Api_ApiComponent extends AppComponent
       $this->_redirect($bitstream->getPath());
       return;
       }
+    $offset = array_key_exists('offset', $args) ? $args['offset'] : 0;
+
     $componentLoader = new MIDAS_ComponentLoader();
     $downloadComponent = $componentLoader->loadComponent('DownloadBitstream');
-    $downloadComponent->download($bitstream);
+    $downloadComponent->download($bitstream, $offset);
     }
 
   /**

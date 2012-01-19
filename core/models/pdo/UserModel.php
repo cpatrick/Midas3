@@ -1,13 +1,21 @@
 <?php
 /*=========================================================================
-MIDAS Server
-Copyright (c) Kitware SAS. 20 rue de la Villette. All rights reserved.
-69328 Lyon, FRANCE.
+ MIDAS Server
+ Copyright (c) Kitware SAS. 26 rue Louis Guérin. 69100 Villeurbanne, FRANCE
+ All rights reserved.
+ More information http://www.kitware.com
 
-See Copyright.txt for details.
-This software is distributed WITHOUT ANY WARRANTY; without even
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-PURPOSE.  See the above copyright notices for more information.
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0.txt
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
 =========================================================================*/
 
 require_once BASE_PATH.'/core/models/base/UserModelBase.php';
@@ -75,26 +83,31 @@ class UserModel extends UserModelBase
     } // end getUserCommunities
 
   /** Get all */
-  function getAll($onlyPublic = false, $limit = 20, $order = 'lastname', $offset = null)
+  function getAll($onlyPublic = false, $limit = 20, $order = 'lastname', $offset = null, $currentUser = null)
     {
     $sql = $this->database->select();
     if($onlyPublic)
       {
-      $sql ->where('privacy = ?', MIDAS_USER_PUBLIC);
+      $orClause = '';
+      if($currentUser !== null && $currentUser->getPrivacy() == MIDAS_USER_PRIVATE)
+        {
+        $orClause = ' OR '.$this->database->getDB()->quoteInto('user_id = ? ', $currentUser->getUserId());
+        }
+      $sql->where('privacy = ?'.$orClause, MIDAS_USER_PUBLIC);
       }
 
     if($offset == null)
       {
-      $sql  ->limit($limit);
+      $sql->limit($limit);
       }
     elseif(!is_numeric($offset))
       {
-      $sql ->where('lastname LIKE ?', $offset.'%');
-      $sql  ->limit($limit);
+      $sql->where('lastname LIKE ?', $offset.'%');
+      $sql->limit($limit);
       }
     else
       {
-      $sql  ->limit($limit, $offset);
+      $sql->limit($limit, $offset);
       }
     switch($order)
       {
@@ -119,6 +132,7 @@ class UserModel extends UserModelBase
       }
     return $return;
     } // end getAll()
+
   /** Get admins */
   function getAdmins()
     {
@@ -204,17 +218,17 @@ class UserModel extends UserModelBase
     if($isAdmin)
       {
       $sql  ->where(' ('.
-          $this->database->getDB()->quoteInto('firstname LIKE ?', '%'.$search.'%').' OR '.
-          $this->database->getDB()->quoteInto('lastname LIKE ?', '%'.$search.'%').')')
+          $this->database->getDB()->quoteInto('u.firstname LIKE ?', '%'.$search.'%').' OR '.
+          $this->database->getDB()->quoteInto('u.lastname LIKE ?', '%'.$search.'%').')')
           ->limit($limit)
           ->setIntegrityCheck(false);
       }
     else
       {
-      $sql  ->where('(privacy = '.MIDAS_USER_PUBLIC.' OR ('.
+      $sql  ->where('(u.privacy = '.MIDAS_USER_PUBLIC.' OR ('.
           $subqueryUser.')>0'.') AND ('.
-          $this->database->getDB()->quoteInto('firstname LIKE ?', '%'.$search.'%').' OR '.
-          $this->database->getDB()->quoteInto('lastname LIKE ?', '%'.$search.'%').')')
+          $this->database->getDB()->quoteInto('u.firstname LIKE ?', '%'.$search.'%').' OR '.
+          $this->database->getDB()->quoteInto('u.lastname LIKE ?', '%'.$search.'%').')')
           ->limit($limit)
           ->setIntegrityCheck(false);
       }
@@ -222,20 +236,20 @@ class UserModel extends UserModelBase
 
     if($group)
       {
-      $sql->group(array('firstname', 'lastname'));
+      $sql->group(array('u.firstname', 'u.lastname'));
       }
 
     switch($order)
       {
       case 'name':
-        $sql->order(array('lastname ASC', 'firstname ASC'));
+        $sql->order(array('u.lastname ASC', 'u.firstname ASC'));
         break;
       case 'date':
-        $sql->order(array('creation ASC'));
+        $sql->order(array('u.creation ASC'));
         break;
       case 'view':
       default:
-        $sql->order(array('view DESC'));
+        $sql->order(array('u.view DESC'));
         break;
       }
     $rowset = $this->database->fetchAll($sql);

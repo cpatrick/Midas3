@@ -1,13 +1,21 @@
 <?php
 /*=========================================================================
-MIDAS Server
-Copyright (c) Kitware SAS. 20 rue de la Villette. All rights reserved.
-69328 Lyon, FRANCE.
+ MIDAS Server
+ Copyright (c) Kitware SAS. 26 rue Louis Guérin. 69100 Villeurbanne, FRANCE
+ All rights reserved.
+ More information http://www.kitware.com
 
-See Copyright.txt for details.
-This software is distributed WITHOUT ANY WARRANTY; without even
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-PURPOSE.  See the above copyright notices for more information.
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0.txt
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
 =========================================================================*/
 
 /**
@@ -17,7 +25,7 @@ PURPOSE.  See the above copyright notices for more information.
 class AssetstoreController extends AppController
   {
 
-  public $_models = array('Assetstore');
+  public $_models = array('Assetstore', 'Setting');
   public $_daos = array('Assetstore');
   public $_components = array('Utility');
   public $_forms = array('Assetstore');
@@ -44,26 +52,17 @@ class AssetstoreController extends AppController
   /** change default assetstore*/
   function defaultassetstoreAction()
     {
-    if(!$this->logged || !$this->userSession->Dao->getAdmin() == 1)
-      {
-      throw new Zend_Exception("You should be an administrator");
-      }
-    if(!$this->getRequest()->isXmlHttpRequest())
-      {
-      throw new Zend_Exception("Why are you here ? Should be ajax.");
-      }
-    $this->_helper->layout->disableLayout();
-    $this->_helper->viewRenderer->setNoRender();
+    $this->requireAdminPrivileges();
+    $this->disableLayout();
+    $this->disableView();
     $change = $this->_getParam("submitDefaultAssetstore");
     $element = $this->_getParam("element");
-    if(isset($change))
+    if(isset($change) && isset($element))
       {
       $assetstore = $this->Assetstore->load($element);
       if($assetstore != false)
         {
-        $applicationConfig = parse_ini_file(BASE_PATH.'/core/configs/application.local.ini', true);
-        $applicationConfig['global']['defaultassetstore.id'] = $assetstore->getKey();
-        $this->Component->Utility->createInitFile(BASE_PATH.'/core/configs/application.local.ini', $applicationConfig);
+        $this->Setting->setConfig('default_assetstore', (string)$assetstore->getKey());
         echo JsonComponent::encode(array(true, $this->t('Changes saved')));
         return;
         }
@@ -75,16 +74,9 @@ class AssetstoreController extends AppController
   /** delete an assetstore assetstore*/
   function deleteAction()
     {
-    if(!$this->logged || !$this->userSession->Dao->getAdmin() == 1)
-      {
-      throw new Zend_Exception("You should be an administrator");
-      }
-    if(!$this->getRequest()->isXmlHttpRequest())
-      {
-      throw new Zend_Exception("Why are you here ? Should be ajax.");
-      }
-    $this->_helper->layout->disableLayout();
-    $this->_helper->viewRenderer->setNoRender();
+    $this->requireAdminPrivileges();
+    $this->disableLayout();
+    $this->disableView();
     $assetstoreId = $this->_getParam("assetstoreId");
     if(isset($assetstoreId))
       {
@@ -103,16 +95,9 @@ class AssetstoreController extends AppController
   /** edit an assetstore assetstore*/
   function editAction()
     {
-    if(!$this->logged || !$this->userSession->Dao->getAdmin() == 1)
-      {
-      throw new Zend_Exception("You should be an administrator");
-      }
-    if(!$this->getRequest()->isXmlHttpRequest())
-      {
-      throw new Zend_Exception("Why are you here ? Should be ajax.");
-      }
-    $this->_helper->layout->disableLayout();
-    $this->_helper->viewRenderer->setNoRender();
+    $this->requireAdminPrivileges();
+    $this->disableLayout();
+    $this->disableView();
     $assetstoreId = $this->_getParam("assetstoreId");
     $assetstoreName = $this->_getParam("assetstoreName");
     $assetstorePath = $this->_getParam("assetstorePath");
@@ -123,7 +108,15 @@ class AssetstoreController extends AppController
         {
         $assetstore->setName($assetstoreName);
         $assetstore->setPath($assetstorePath);
-        $this->Assetstore->save($assetstore);
+        try
+          {
+          $this->Assetstore->save($assetstore);
+          }
+        catch(Zend_Exception $ze)
+          {
+          echo JsonComponent::encode(array(false, $ze->getMessage()));
+          return;
+          }
         echo JsonComponent::encode(array(true, $this->t('Changes saved')));
         return;
         }
@@ -137,8 +130,9 @@ class AssetstoreController extends AppController
    */
   function addAction()
     {
-    $this->_helper->layout->disableLayout();
-    $this->_helper->viewRenderer->setNoRender();
+    $this->requireAdminPrivileges();
+    $this->disableLayout();
+    $this->disableView();
 
     $form = $this->Form->Assetstore->createAssetstoreForm();
     if($this->getRequest()->isPost() && !$form->isValid($_POST))
@@ -153,8 +147,16 @@ class AssetstoreController extends AppController
       $assetstoreDao = new AssetstoreDao();
       $assetstoreDao->setName($form->name->getValue());
       $assetstoreDao->setPath($form->basedirectory->getValue());
-      $assetstoreDao->setType($form->type->getValue());
-      $this->Assetstore->save($assetstoreDao);
+      $assetstoreDao->setType($form->assetstoretype->getValue());
+      try
+        {
+        $this->Assetstore->save($assetstoreDao);
+        }
+      catch(Zend_Exception $ze)
+        {
+        echo json_encode(array('error' => $ze->getMessage()));
+        return false;
+        }
 
       echo json_encode(array('msg' => 'The assetstore has been added.',
                        'assetstore_id' => $assetstoreDao->getAssetstoreId(),
